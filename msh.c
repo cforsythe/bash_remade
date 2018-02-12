@@ -15,7 +15,16 @@ int main(){
             printf("Error, input should not be more than 120 characters\n");
         }
         else if(strcmp(c, "exit\n") == 0) break; //check if input = exit
-        else printf("%s", c);
+        else{
+            char * args = strtok(c, " ");
+            printf("%s\n", c);
+            int count = 1;
+            while(args != NULL){
+                printf("%d: %s\n", count, args);
+                args = strtok(NULL, " ");
+                count++;
+            }
+        }
     }
     return 0;
 }
