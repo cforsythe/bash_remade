@@ -16,10 +16,13 @@ int main(){
         }
         else if(strcmp(c, "exit\n") == 0) break; //check if input = exit
         else{
-            char * args = strtok(c, " ");
             printf("%s\n", c);
+            char * args = strtok(c, " ");
             int count = 1;
             while(args != NULL){
+                if(args == NULL){
+                    continue;
+                }
                 printf("%d: %s\n", count, args);
                 args = strtok(NULL, " ");
                 count++;
