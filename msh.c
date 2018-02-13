@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/wait.h>
+#include <time.h>
 
 const int MAX_SIZE = 121;
 
@@ -21,8 +22,14 @@ int main(){
         }
         else if(strcmp(c, "exit\n") == 0) break; //check if input = exit
         else if(strcmp(c, "help\n") == 0) printf("enter Linux commands or 'exit' to exit\n"); //check if input = exit
+        else if(strcmp(c, "today\n") == 0){
+            time_t seconds = time(NULL);
+            struct tm * today = localtime(&seconds);
+            char time_as_str[26];
+            strftime(time_as_str, 26, "%m/%d/%y", today);
+            printf("%s\n",time_as_str); 
+        }
         else{
-            printf("%s", c);
             char * s = c;
             s[strcspn(s, "\n")] = 0;
             char * args[MAX_SIZE];
