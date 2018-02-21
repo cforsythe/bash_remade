@@ -7,9 +7,69 @@
 #include <time.h>
 
 const int MAX_SIZE = 121;
+void printArray(char * args[], int size){
+    int i = 0;
+    for(i = 0; i < size; i++){
+        if(i != size - 1) printf("%s, ", args[i]);
+        else printf("%s\n", args[i]);
+    }
+}
 
-int main(){
+void forkExec(char * args[], int count){
+    if(strcmp(args[0], "cd") == 0){ //run different commands if cd
+        int status;
+        if(count == 1) status = chdir(getenv("HOME")); //send to home dir
+        else if(strcmp(args[1], "~") == 0) status = chdir(getenv("HOME"));
+        else status = chdir(args[1]); 
+        if(status != 0){
+            perror("Error");
+        }
+    }
+    else{
+        args[count] = NULL; //set last element to null termination
+        int pid = fork(); 
+        if(pid < 0){
+            printf("Fork failed\n");
+        }
+        else if(pid == 0){ //if child run command using bash
+            execvp(args[0], args);
+            perror("Exec failed");
+            return;
+        }
+        else{
+            int wc = wait(NULL); //waits for child to complete
+        }
+    }
+}
+void runFunction(char c[MAX_SIZE]){
+    char * s = c;
+    s[strcspn(s, "\n")] = 0; //if \n found remove it
+    char * args[121];
+    char * tok = strtok(s, " "); //start tokenizing
+    int count = 0;
+    while(tok != NULL){ //put all tokens in an array
+        args[count] = strdup(tok);
+        tok = strtok(NULL, " ");
+        count++;
+    }
+    forkExec(args, count);
+}
+
+int main(int argc, char * argv[]){
     char c[MAX_SIZE];
+    if(argc > 1){
+        FILE * f = fopen(argv[1], "r"); //check if is file
+        if(f == NULL){  //run command if not file
+            forkExec(argv+1, argc-1);
+        }
+        else{ //run all commands in file
+            while(fgets(c, 122, f) != NULL){
+                runFunction(c);
+            }
+            fclose(f);
+        }
+        return 0;
+    }
     while(1){
         printf("msh> ");
         if(!fgets(c, 122, stdin)){ //if line doesn't recieve input
@@ -30,29 +90,7 @@ int main(){
             printf("%s\n",time_as_str); 
         }
         else{
-            char * s = c;
-            s[strcspn(s, "\n")] = 0; //if \n found remove it
-            char * args[MAX_SIZE];
-            char * tok = strtok(s, " "); //start tokenizing
-            int count = 0;
-            while(tok != NULL){ //put all tokens in an array
-                args[count] = strdup(tok);
-                tok = strtok(NULL, " ");
-                count++;
-            }
-            args[count] = NULL; //set last element to null termination
-            int pid = fork(); 
-            if(pid < 0){
-                printf("Fork failed\n");
-            }
-            else if(pid == 0){ //if child run command using bash
-                execvp(args[0], args);
-                perror("Exec failed");
-                return 1;
-            }
-            else{
-                int wc = wait(NULL); //waits for child to complete
-            }
+            runFunction(c);
         }
     }
     return 0;
